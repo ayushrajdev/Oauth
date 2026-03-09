@@ -20,7 +20,9 @@ const redirectUrl = "http://localhost:5500/callback.html";
 const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${clientId}&scope=openid email profile&redirect_uri=${redirectUrl}`;
 
 app.post("/auth/google", async (req, res) => {
+  console.log(req);
   res.redirect(authUrl);
+  res.end();
 });
 
 app.get("/auth/token", async (req, res) => {
