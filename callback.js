@@ -10,6 +10,11 @@
 // }
 
 let sid = new URLSearchParams(location.search).get("sid");
+let error = new URLSearchParams(location.search).get("error");
+if (error) {
+  window.opener.postMessage({ success: false});
+  window.close();  
+}
 if (sid) {
   const response = await fetch(
     `http://localhost:3000/session-cookie?sid=${sid}`,

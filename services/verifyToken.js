@@ -16,5 +16,18 @@ const loginTicket = await client.verifyIdToken({
 // if not, fetch the public key from google and verify the token and store the public key in cache for future use
 // the audience field is the client id of the application which is registered in google console
 //it check the audience field in the token is same as the client id of the application or not
-//
 console.log(loginTicket.getPayload());
+
+// use the access token to fetch the user details from google
+
+async function fetchUserDetails(accessToken) {
+  const response = await fetch(
+    "https://www.googleapis.com/oauth2/v3/userinfo",
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
+}

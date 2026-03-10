@@ -24,23 +24,10 @@ window.addEventListener("message", async ({ data }) => {
 
   if (data.success === true) {
     location.href = "/index.html";
+  } else {
+    location.href = "/login.html";
   }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // async function fetchIdToken(code) {
 //   console.log("Running fetchIdToken function...");

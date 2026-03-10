@@ -24,8 +24,12 @@ const authUrl = client.generateAuthUrl({
   client_id: clientId,
   redirect_uri: redirectUrl,
   scope: ["openid", "email", "profile"],
+  // prompt: "consent", // it will ask the user to select the account and give the consent to access the profile and email of the user
+  // access_type: "offline", // it will give the refresh token to the application to access the profile and email of the user even after the access token is expired
 });
 
+// prompt -> select_account, consent, none
+// not set the prompt field until you want refresh token
 const client = new OAuth2Client({
   client_id: clientId,
   client_secret: clientSecret,
@@ -57,7 +61,13 @@ app.get("/auth/token", async (req, res) => {
 
   // const data = await response.json();
 
-  const { tokens } = await client.getToken(req.query.code);
+  const { code } = req.query;
+
+  if (!code) {
+   return  res.redirect(`http://localhost:5500/callback.html?error=true`);
+  }
+
+  const { tokens } = await client.getToken(code);
 
   const idToken = tokens.id_token;
 
