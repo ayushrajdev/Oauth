@@ -1,7 +1,7 @@
 import express from "express";
 import cookieParser from "cookieParser";
 import cors from "cors";
-import {} from "google-auth-library";
+import { OAuth2Client } from "google-auth-library";
 const app = express();
 
 app.use(express.json());
@@ -12,18 +12,27 @@ app.use(
   }),
 );
 
-const client = new OAuth2Client();
-
 const clientId =
   "49496056122-gtvbtjankhnq56ei05dmv01v7nsgjvvq.apps.googleusercontent.com";
 
 const clientSecret = "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";
 const redirectUrl = "http://localhost:5500/callback.html";
 
-const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${clientId}&scope=openid email profile&redirect_uri=${redirectUrl}`;
+// const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${clientId}&scope=openid email profile&redirect_uri=${redirectUrl}`;
+
+const authUrl = client.generateAuthUrl({
+  client_id: clientId,
+  redirect_uri: redirectUrl,
+  scope: ["openid", "email", "profile"],
+});
+
+const client = new OAuth2Client({
+  client_id: clientId,
+  client_secret: clientSecret,
+  redirect_uri: redirectUrl,
+});
 
 app.post("/auth/google", async (req, res) => {
-  console.log(req);
   res.redirect(authUrl);
   res.end();
 });
@@ -35,20 +44,22 @@ app.get("/auth/token", async (req, res) => {
     return res.json({ message: "already loggedin" });
   }
 
-  const { code } = req.query;
-  const payload = `code=${code}&client_id=${clientId}&client_secret=${clientSecret}&redirect_uri=${redirectUrl}&grant_type=authorization_code`;
+  // const { code } = req.query;
+  // const payload = `code=${code}&client_id=${clientId}&client_secret=${clientSecret}&redirect_uri=${redirectUrl}&grant_type=authorization_code`;
 
-  const response = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: payload,
-  });
+  // const response = await fetch("https://oauth2.googleapis.com/token", {
+  //   method: "POST",
+  //   headers: {
+  //     "Content-Type": "application/x-www-form-urlencoded",
+  //   },
+  //   body: payload,
+  // });
 
-  const data = await response.json();
+  // const data = await response.json();
 
-  const idToken = data.id_token;
+  const { tokens } = await client.getToken(req.query.code);
+
+  const idToken = tokens.id_token;
 
   const loginTicket = await client.verifyIdToken({
     idToken,
@@ -57,7 +68,7 @@ app.get("/auth/token", async (req, res) => {
 
   const userData = loginTicket.getPayload();
 
-  //! user,session are mongoose model but not implemented this is only a pseudo code
+  //! user,session are mongoose model but not implemented this is only a pseudo code to show the flow of the application and how the session is created and stored in the database and how the cookie is set in the browser
   let user, session;
   user = await User.find({
     email: userData.email,
