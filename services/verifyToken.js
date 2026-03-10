@@ -1,0 +1,20 @@
+import { OAuth2Client } from "google-auth-library";
+
+export const client = new OAuth2Client();
+
+const clientId =
+  "49496056122-gtvbtjankhnq56ei05dmv01v7nsgjvvq.apps.googleusercontent.com";
+const token =
+  "eyJhbGciOiJSUzI1NiIsImtpZCI6IjI1MDdmNTFhZjJhMTYyNDY3MDc0ODQ2NzRhNDJhZTNjMmI2MjMxOWMiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiI0OTQ5NjA1NjEyMi1ndHZidGphbmtobnE1NmVpMDVkbXYwMXY3bnNnanZ2cS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImF1ZCI6IjQ5NDk2MDU2MTIyLWd0dmJ0amFua2hucTU2ZWkwNWRtdjAxdjduc2dqdnZxLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTA3MjA5MDYxNzA2NzYzNDU4MDcyIiwiZW1haWwiOiJheXVzaHJhajI0ODJAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF0X2hhc2giOiJ1ZjNZMVNsNlFwemVyQVV3d1I5SGdnIiwibmFtZSI6IkF5dXNoIFJhaiIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NKVjRnUjdvV1Jvd18tSVppdjR6MEoyTlYwUm42TkUtSkFIV3hYVGpmdGRvamdWc3c9czk2LWMiLCJnaXZlbl9uYW1lIjoiQXl1c2giLCJmYW1pbHlfbmFtZSI6IlJhaiIsImlhdCI6MTc3MjYwOTMyMiwiZXhwIjoxNzcyNjEyOTIyfQ.AMLBIXfFV1PP7HR8DRF6buS4smElA0Bb0Is-c9SFXQn3w5eTNjaa6X3Y7KzkPrc1EO8VjMwB2myEqZrtQmGqKFJXNywy1xie_6OWqqYUW_tlehLz_K--HxzEd_sXxQ8oM8Ubyk9r_YxR0WUTQZixTzmuvUcyEtFOienhLorzuKHXLvh7CJT67ovSMRkAIxxOYqYxygrwDMb_s47aJfdctcR1Bmj1z9POsj2vqGrbU6GE_vW9UFPZevItJY8EL_87r_IFf_-K77MUyg_KLRzF8xxh0t693Jo4dwxIbXPun97P51P0tlkDq96-xzxWOEIz9X1JgO7qV09DP9Xp29eq0w";
+
+const loginTicket = await client.verifyIdToken({
+  idToken: token,
+  audience: clientId,
+});
+
+//verify token check the cache is the public key is present or not
+// if not, fetch the public key from google and verify the token and store the public key in cache for future use
+// the audience field is the client id of the application which is registered in google console
+//it check the audience field in the token is same as the client id of the application or not
+//
+console.log(loginTicket.getPayload());

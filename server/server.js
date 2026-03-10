@@ -1,6 +1,7 @@
 import express from "express";
 import cookieParser from "cookieParser";
 import cors from "cors";
+import {} from "google-auth-library";
 const app = express();
 
 app.use(express.json());
@@ -10,6 +11,8 @@ app.use(
     credentials: true,
   }),
 );
+
+const client = new OAuth2Client();
 
 const clientId =
   "49496056122-gtvbtjankhnq56ei05dmv01v7nsgjvvq.apps.googleusercontent.com";
@@ -44,8 +47,15 @@ app.get("/auth/token", async (req, res) => {
   });
 
   const data = await response.json();
-  const userToken = data.id_token.split(".")[1];
-  const userData = JSON.parse(atob(userToken));
+
+  const idToken = data.id_token;
+
+  const loginTicket = await client.verifyIdToken({
+    idToken,
+    audience: clientId,
+  });
+
+  const userData = loginTicket.getPayload();
 
   //! user,session are mongoose model but not implemented this is only a pseudo code
   let user, session;
