@@ -20,6 +20,14 @@ const redirectUrl = "http://localhost:5500/callback.html";
 
 // const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${clientId}&scope=openid email profile&redirect_uri=${redirectUrl}`;
 
+//! setting up google client
+const client = new OAuth2Client({
+  client_id: clientId,
+  client_secret: clientSecret,
+  redirect_uri: redirectUrl,
+});
+
+
 const authUrl = client.generateAuthUrl({
   client_id: clientId,
   redirect_uri: redirectUrl,
@@ -30,17 +38,14 @@ const authUrl = client.generateAuthUrl({
 
 // prompt -> select_account, consent, none
 // not set the prompt field until you want refresh token
-const client = new OAuth2Client({
-  client_id: clientId,
-  client_secret: clientSecret,
-  redirect_uri: redirectUrl,
-});
 
+//? generate auth url and redirect 
 app.post("/auth/google", async (req, res) => {
   res.redirect(authUrl);
   res.end();
 });
 
+//? extract code and generate token
 app.get("/auth/token", async (req, res) => {
   const sid = req.cookies.sid;
   const existingSession = await Session.findById(sid);
@@ -64,7 +69,7 @@ app.get("/auth/token", async (req, res) => {
   const { code } = req.query;
 
   if (!code) {
-   return  res.redirect(`http://localhost:5500/callback.html?error=true`);
+    return res.redirect(`http://localhost:5500/callback.html?error=true`);
   }
 
   const { tokens } = await client.getToken(code);
