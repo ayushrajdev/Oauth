@@ -4,19 +4,34 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <script src="https://accounts.google.com/gsi/client" async></script>
     <script src="index.js" defer></script>
   </head>
   <body>
-
-    
-    <a
+    <!-- <a
       href="https://accounts.google.com/o/oauth2/v2/auth?response_type=id_token&client_id=49496056122-gtvbtjankhnq56ei05dmv01v7nsgjvvq.apps.googleusercontent.com&scope=openid%20email%20profile&redirect_uri=http://localhost:5500/implict-grant-type/index.html&nonce=123456ayush"
-    >one tap login with google</a>
+      >one tap login with google</a
+    > -->
 
-    <button>login</button>
+    <!-- <div
+      id="g_id_onload"
+      data-client_id="49496056122-gtvbtjankhnq56ei05dmv01v7nsgjvvq.apps.googleusercontent.com"
+      data-context="signin"
+      data-ux_mode="popup"
+      data-callback="googleLoginCallback"
+      data-auto_prompt="false"
+    ></div>
 
-  
+    <div
+      class="g_id_signin"
+      data-type="standard"
+      data-shape="rectangular"
+      data-theme="outline"
+      data-text="signin_with"
+      data-size="large"
+      data-logo_alignment="left"
+    ></div> -->
+
+    <div id="google-login"></div>
   </body>
 </html>
-
-
