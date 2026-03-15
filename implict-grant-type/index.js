@@ -35,6 +35,8 @@ const clientId =
 //   google.accounts.id.prompt();
 // };
 
+
+//GSI
 window.onload = function () {
   google.accounts.id.initialize({
     client_id: clientId,

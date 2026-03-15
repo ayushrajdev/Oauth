@@ -1,85 +1,119 @@
-import passport, { session } from "passport";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import passport, { session } from 'passport';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 
-//? passport js can might be slow than the google auth library as passport js uses the access token to call the user endpoint to get the user info but the google auth library gives the user info in the id token itself but it do the extra call to verify the token but it cache it for sometime 
-
-
+//? passport js can might be slow than the google auth library as passport js uses the access token to call the user endpoint to get the user info but the google auth library gives the user info in the id token itself but it do the extra call to verify the token but it cache it for sometime
 
 const clientId =
-  "49496056122-gtvbtjankhnq56ei05dmv01v7nsgjvvq.apps.googleusercontent.com";
+    '49496056122-gtvbtjankhnq56ei05dmv01v7nsgjvvq.apps.googleusercontent.com';
 
-const clientSecret = "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";
-const redirectUrl = "http://localhost:5500/callback.html";
+const clientSecret = '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';
+const redirectUrl = 'http://localhost:5500/callback.html';
 
 //setting up google client
 passport.use(
-  new GoogleStrategy(
-    {
-      clientID: clientId,
-      clientSecret: clientSecret,
-      callbackURL: redirectUrl,
-    },
-    function (accessToken, refreshToken, profile, cb) {
-      return cb(null, profile);
-    },
-  ),
+    new GoogleStrategy(
+        {
+            clientID: clientId,
+            clientSecret: clientSecret,
+            callbackURL: redirectUrl,
+        },
+        function (accessToken, refreshToken, profile, cb) {
+            return cb(null, profile);
+        },
+    ),
 );
-
+//Generate AuthURL and Redirect
 app.get(
-  "/auth/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email", "openid "],
-    prompt: "consent",
-  }),
+    '/auth/google',
+    passport.authenticate('google', {
+        scope: ['profile', 'email', 'openid '],
+        prompt: 'consent',
+    }),
 );
 
 //by default the passportjs uses the express-session
+
+// Extract Auth Code and Exchange for ID Token
 app.get(
-  "/auth/google/callback",
+    '/auth/google/callback',
 
-  passport.authenticate("google", {
-    failureRedirect: "/login",
-    session: false,
-  }),
+    passport.authenticate('google', {
+        failureRedirect: 'http://localhost:5500/callback.html?error=true',
+        session: false,
+    }),
 
-  async function (req, res) {
-    // // Successful authentication, redirect home.
-    // res.redirect("/");
+    async function (req, res) {
+        // // Successful authentication, redirect home.
+        // res.redirect("/");
 
-    const userData = req.profile._json;
+        const userData = req.profile._json;
 
-    //! user,session are mongoose model but not implemented this is only a pseudo code to show the flow of the application and how the session is created and stored in the database and how the cookie is set in the browser
-    let user, session;
-    user = await User.find({
-      email: userData.email,
-    });
+        //! user,session are mongoose model but not implemented this is only a pseudo code to show the flow of the application and how the session is created and stored in the database and how the cookie is set in the browser
+        let user, session;
+        user = await User.find({
+            email: userData.email,
+        });
 
-    if (!user) {
-      user = await User.create({
-        email: userData.email,
-      });
-    }
+        if (!user) {
+            user = await User.create({
+                email: userData.email,
+            });
+        }
 
-    const previousSession = await Session.find({
-      userId: user.id,
-    });
+        const previousSession = await Session.find({
+            userId: user.id,
+        });
 
-    if (previousSession) {
-      await previousSession.deleteOne();
-    }
+        if (previousSession) {
+            await previousSession.deleteOne();
+        }
 
-    session = new Session({
-      email,
-      createdAt: Date.now(),
-    });
+        session = new Session({
+            email,
+            createdAt: Date.now(),
+        });
 
-    session.save();
-    res.cookie("sid", session.id, {
-      expires: 3600,
-      httpOnly: true,
-    });
-    res.redirect(`http://localhost:5500/callback.html?sid=${sid}`);
+        session.save();
+        res.cookie('sid', session.id, {
+            expires: 3600,
+            httpOnly: true,
+        });
+        res.redirect(`http://localhost:5500/callback.html?sid=${sid}`);
 
-    return res.end();
-  },
+        return res.end();
+    },
 );
+
+app.get('/session-cookie', async (req, res) => {
+    const { sid } = req.query;
+    res.cookie('sid', sid, {
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+        httpOnly: true,
+    });
+    res.end();
+});
+
+app.get('/profile', async (req, res) => {
+    const { sid } = req.cookies;
+    const existingSession = sessions.find(({ sessionId }) => sid === sessionId);
+    if (!existingSession) {
+        return res.status(401).json({ error: 'Not logged in.' });
+    }
+
+    const existingUser = users.find(({ id }) => id === existingSession.userId);
+    if (!existingUser) {
+        return res.status(404).json({ error: 'User not found.' });
+    }
+
+    return res.json(existingUser);
+});
+
+app.post('/logout', async (req, res) => {
+    const { sid } = req.cookies;
+    const sessionIndex = sessions.findIndex(
+        ({ sessionId }) => sid === sessionId,
+    );
+    sessions.splice(sessionIndex, 1);
+    await writeFile('sessionsDB.json', JSON.stringify(sessions, null, 2));
+    res.status(204).end();
+});

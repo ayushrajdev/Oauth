@@ -6,7 +6,7 @@ if (idToken) {
   async function fetchToken() {
     try {
       //send the idToken to server and then server will verify the token and then it will extract the user details and create the user session and send the user session id to the user and the control over the user is also is handled by the server
-      const response = await fetch("http://localhost:3000/token-details", {
+      const response = await fetch("http://localhost:3000/auth/google", {
         method: "POST",
         body: JSON.stringify(idToken),
         headers: {
